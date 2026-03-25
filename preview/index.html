@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vocal Remover Elite</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(135deg,#7c3aed,#ec4899,#06b6d4);
+  color: white;
+  text-align: center;
+}
+
+.container {
+  padding: 40px 20px;
+}
+
+h1 {
+  font-size: 36px;
+}
+
+.box {
+  background: rgba(255,255,255,0.15);
+  padding: 30px;
+  border-radius: 20px;
+  margin-top: 30px;
+}
+
+input, button {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  margin: 10px;
+}
+
+button {
+  background: #fff;
+  color: #333;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.result {
+  margin-top: 20px;
+  display: none;
+}
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+  <h1>🎤 Vocal Remover Elite</h1>
+  <p>Upload a song and simulate vocal removal</p>
+
+  <div class="box">
+    <input type="file" id="file">
+    <br>
+    <button onclick="process()">Remove Vocals</button>
+
+    <div class="result" id="result">
+      <p>✅ Processing Complete (Preview Mode)</p>
+      <button>Download Instrumental</button>
+      <button>Download Vocals</button>
+    </div>
+  </div>
+</div>
+
+<script>
+function process() {
+  document.getElementById("result").style.display = "block";
+}
+</script>
+
+</body>
+</html>
