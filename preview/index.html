@@ -1,80 +1,369 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Vocal Remover Elite</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vocal Remover Elite</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #7c3aed, #ec4899, #06b6d4);
+      color: white;
+      text-align: center;
+      min-height: 100vh;
+    }
 
-<style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(135deg,#7c3aed,#ec4899,#06b6d4);
-  color: white;
-  text-align: center;
-}
+    .container {
+      padding: 40px 20px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
 
-.container {
-  padding: 40px 20px;
-}
+    h1 {
+      font-size: 42px;
+      margin-bottom: 10px;
+    }
 
-h1 {
-  font-size: 36px;
-}
+    .subtitle {
+      font-size: 20px;
+      margin-bottom: 28px;
+    }
 
-.box {
-  background: rgba(255,255,255,0.15);
-  padding: 30px;
-  border-radius: 20px;
-  margin-top: 30px;
-}
+    .box {
+      background: rgba(255,255,255,0.16);
+      padding: 30px;
+      border-radius: 22px;
+      margin-top: 30px;
+      backdrop-filter: blur(8px);
+    }
 
-input, button {
-  padding: 12px;
-  border-radius: 10px;
-  border: none;
-  margin: 10px;
-}
+    input, button {
+      padding: 12px 16px;
+      border-radius: 12px;
+      border: none;
+      margin: 10px;
+      font-size: 16px;
+    }
 
-button {
-  background: #fff;
-  color: #333;
-  cursor: pointer;
-  font-weight: bold;
-}
+    button {
+      background: white;
+      color: #222;
+      cursor: pointer;
+      font-weight: bold;
+    }
 
-.result {
-  margin-top: 20px;
-  display: none;
-}
-</style>
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
+    .status {
+      margin-top: 18px;
+      font-size: 18px;
+      min-height: 28px;
+    }
+
+    .result {
+      margin-top: 24px;
+      display: none;
+    }
+
+    .audio-block {
+      background: rgba(255,255,255,0.14);
+      border-radius: 18px;
+      padding: 18px;
+      margin: 16px auto;
+      max-width: 700px;
+    }
+
+    .audio-block h3 {
+      margin-top: 0;
+    }
+
+    audio {
+      width: 100%;
+      margin-top: 10px;
+    }
+
+    .note {
+      margin-top: 24px;
+      font-size: 14px;
+      opacity: 0.95;
+      line-height: 1.6;
+    }
+
+    .progress-wrap {
+      max-width: 500px;
+      margin: 18px auto 0;
+      display: none;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 14px;
+      background: rgba(255,255,255,0.25);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      background: white;
+      transition: width 0.3s ease;
+    }
+
+    .small {
+      font-size: 14px;
+      margin-top: 8px;
+    }
+  </style>
 </head>
-
 <body>
+  <div class="container">
+    <h1>🎤 Vocal Remover Elite</h1>
+    <div class="subtitle">Upload a song and create real downloadable preview outputs</div>
 
-<div class="container">
-  <h1>🎤 Vocal Remover Elite</h1>
-  <p>Upload a song and simulate vocal removal</p>
+    <div class="box">
+      <input type="file" id="fileInput" accept="audio/*" />
+      <br>
+      <button id="processBtn">Remove Vocals</button>
 
-  <div class="box">
-    <input type="file" id="file">
-    <br>
-    <button onclick="process()">Remove Vocals</button>
+      <div class="progress-wrap" id="progressWrap">
+        <div class="progress-bar">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+        <div class="small" id="progressText">Preparing...</div>
+      </div>
 
-    <div class="result" id="result">
-      <p>✅ Processing Complete (Preview Mode)</p>
-      <button>Download Instrumental</button>
-      <button>Download Vocals</button>
+      <div class="status" id="statusText"></div>
+
+      <div class="result" id="resultBox">
+        <div class="audio-block">
+          <h3>Instrumental Preview</h3>
+          <audio id="instrumentalPlayer" controls></audio>
+          <br>
+          <button id="downloadInstrumental">Download Instrumental</button>
+        </div>
+
+        <div class="audio-block">
+          <h3>Vocals Preview</h3>
+          <audio id="vocalsPlayer" controls></audio>
+          <br>
+          <button id="downloadVocals">Download Vocals</button>
+        </div>
+      </div>
+
+      <div class="note">
+        This is a real browser preview with actual downloads. It uses a simple stereo/center-channel method, so it is useful for testing workflow, but not equal to full AI studio separation.
+      </div>
     </div>
   </div>
-</div>
 
-<script>
-function process() {
-  document.getElementById("result").style.display = "block";
-}
-</script>
+  <script>
+    const fileInput = document.getElementById("fileInput");
+    const processBtn = document.getElementById("processBtn");
+    const statusText = document.getElementById("statusText");
+    const resultBox = document.getElementById("resultBox");
+    const instrumentalPlayer = document.getElementById("instrumentalPlayer");
+    const vocalsPlayer = document.getElementById("vocalsPlayer");
+    const downloadInstrumental = document.getElementById("downloadInstrumental");
+    const downloadVocals = document.getElementById("downloadVocals");
+    const progressWrap = document.getElementById("progressWrap");
+    const progressFill = document.getElementById("progressFill");
+    const progressText = document.getElementById("progressText");
 
+    let instrumentalUrl = null;
+    let vocalsUrl = null;
+
+    function setProgress(percent, text) {
+      progressWrap.style.display = "block";
+      progressFill.style.width = percent + "%";
+      progressText.textContent = text;
+    }
+
+    function cleanupOldUrls() {
+      if (instrumentalUrl) URL.revokeObjectURL(instrumentalUrl);
+      if (vocalsUrl) URL.revokeObjectURL(vocalsUrl);
+      instrumentalUrl = null;
+      vocalsUrl = null;
+    }
+
+    function interleaveTo16BitPCM(left, right) {
+      const length = left.length;
+      const buffer = new ArrayBuffer(length * 4);
+      const view = new DataView(buffer);
+      let offset = 0;
+
+      for (let i = 0; i < length; i++) {
+        let l = Math.max(-1, Math.min(1, left[i]));
+        let r = Math.max(-1, Math.min(1, right[i]));
+        view.setInt16(offset, l < 0 ? l * 0x8000 : l * 0x7FFF, true);
+        offset += 2;
+        view.setInt16(offset, r < 0 ? r * 0x8000 : r * 0x7FFF, true);
+        offset += 2;
+      }
+
+      return buffer;
+    }
+
+    function monoTo16BitPCM(data) {
+      const length = data.length;
+      const buffer = new ArrayBuffer(length * 2);
+      const view = new DataView(buffer);
+      let offset = 0;
+
+      for (let i = 0; i < length; i++) {
+        let s = Math.max(-1, Math.min(1, data[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        offset += 2;
+      }
+
+      return buffer;
+    }
+
+    function createWavBlobStereo(left, right, sampleRate) {
+      const pcmData = interleaveTo16BitPCM(left, right);
+      const header = new ArrayBuffer(44);
+      const view = new DataView(header);
+
+      function writeString(offset, str) {
+        for (let i = 0; i < str.length; i++) {
+          view.setUint8(offset + i, str.charCodeAt(i));
+        }
+      }
+
+      writeString(0, "RIFF");
+      view.setUint32(4, 36 + pcmData.byteLength, true);
+      writeString(8, "WAVE");
+      writeString(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 2, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 4, true);
+      view.setUint16(32, 4, true);
+      view.setUint16(34, 16, true);
+      writeString(36, "data");
+      view.setUint32(40, pcmData.byteLength, true);
+
+      return new Blob([header, pcmData], { type: "audio/wav" });
+    }
+
+    function createWavBlobMono(data, sampleRate) {
+      const pcmData = monoTo16BitPCM(data);
+      const header = new ArrayBuffer(44);
+      const view = new DataView(header);
+
+      function writeString(offset, str) {
+        for (let i = 0; i < str.length; i++) {
+          view.setUint8(offset + i, str.charCodeAt(i));
+        }
+      }
+
+      writeString(0, "RIFF");
+      view.setUint32(4, 36 + pcmData.byteLength, true);
+      writeString(8, "WAVE");
+      writeString(12, "fmt ");
+      view.setUint32(16, 16, true);
+      view.setUint16(20, 1, true);
+      view.setUint16(22, 1, true);
+      view.setUint32(24, sampleRate, true);
+      view.setUint32(28, sampleRate * 2, true);
+      view.setUint16(32, 2, true);
+      view.setUint16(34, 16, true);
+      writeString(36, "data");
+      view.setUint32(40, pcmData.byteLength, true);
+
+      return new Blob([header, pcmData], { type: "audio/wav" });
+    }
+
+    function downloadBlob(url, filename) {
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
+    processBtn.addEventListener("click", async () => {
+      const file = fileInput.files[0];
+      if (!file) {
+        statusText.textContent = "Please choose an audio file first.";
+        return;
+      }
+
+      cleanupOldUrls();
+      resultBox.style.display = "none";
+      statusText.textContent = "";
+      processBtn.disabled = true;
+
+      try {
+        setProgress(10, "Reading file...");
+        const arrayBuffer = await file.arrayBuffer();
+
+        setProgress(30, "Decoding audio...");
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        const audioContext = new AudioContextClass();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        setProgress(55, "Separating preview stems...");
+        const sampleRate = audioBuffer.sampleRate;
+        const length = audioBuffer.length;
+        const left = audioBuffer.getChannelData(0);
+        const right = audioBuffer.numberOfChannels > 1
+          ? audioBuffer.getChannelData(1)
+          : audioBuffer.getChannelData(0);
+
+        const instrumentalLeft = new Float32Array(length);
+        const instrumentalRight = new Float32Array(length);
+        const vocalsMono = new Float32Array(length);
+
+        for (let i = 0; i < length; i++) {
+          const l = left[i] || 0;
+          const r = right[i] || 0;
+
+          const center = (l + r) * 0.5;
+          const side = (l - r) * 0.5;
+
+          vocalsMono[i] = center;
+          instrumentalLeft[i] = side;
+          instrumentalRight[i] = -side;
+        }
+
+        setProgress(80, "Creating WAV files...");
+        const instrumentalBlob = createWavBlobStereo(instrumentalLeft, instrumentalRight, sampleRate);
+        const vocalsBlob = createWavBlobMono(vocalsMono, sampleRate);
+
+        instrumentalUrl = URL.createObjectURL(instrumentalBlob);
+        vocalsUrl = URL.createObjectURL(vocalsBlob);
+
+        instrumentalPlayer.src = instrumentalUrl;
+        vocalsPlayer.src = vocalsUrl;
+
+        downloadInstrumental.onclick = () => {
+          downloadBlob(instrumentalUrl, "instrumental-preview.wav");
+        };
+
+        downloadVocals.onclick = () => {
+          downloadBlob(vocalsUrl, "vocals-preview.wav");
+        };
+
+        setProgress(100, "Done.");
+        statusText.textContent = "✅ Processing complete. Real preview files are ready.";
+        resultBox.style.display = "block";
+
+        await audioContext.close();
+      } catch (err) {
+        console.error(err);
+        statusText.textContent = "Could not process this file. Try MP3 or WAV.";
+        progressWrap.style.display = "none";
+      } finally {
+        processBtn.disabled = false;
+      }
+    });
+  </script>
 </body>
 </html>
